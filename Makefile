@@ -6,10 +6,6 @@ down:
 	docker-compose down
 	@echo "Contêineres do aplicativo parados e removidos."
 
-run:
-	go run cmd/rate-limiter/main.go
-	@echo "Rate Limiter compilado e iniciado com sucesso."
-
 test:
 	go test -v ./...
 	@echo "Testes realizados com sucesso."

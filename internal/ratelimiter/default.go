@@ -18,7 +18,7 @@ func NewDefaultRateLimiter(settings *Settings, db gateway.DatabaseGateway) *Defa
 	return &DefaultRateLimiter{settings, db}
 }
 
-func (rt *DefaultRateLimiter) CanGo(ctx context.Context, r *http.Request) (bool, error) {
+func (rt *DefaultRateLimiter) Execute(ctx context.Context, r *http.Request) (bool, error) {
 	key := r.Header.Get("API_KEY")
 	if key == "" || !rt.settings.LimitByToken {
 		host, _, err := net.SplitHostPort(r.RemoteAddr)

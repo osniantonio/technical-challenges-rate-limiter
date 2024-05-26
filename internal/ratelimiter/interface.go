@@ -6,5 +6,5 @@ import (
 )
 
 type RateLimiter interface {
-	CanGo(context.Context, *http.Request) (bool, error)
+	Execute(context.Context, *http.Request) (bool, error)
 }

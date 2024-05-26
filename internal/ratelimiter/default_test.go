@@ -56,7 +56,7 @@ func TestMain(m *testing.M) {
 
 func TestDefaultRateLimiter(t *testing.T) {
 	ctx := context.Background()
-	token := "p7eWgd0PvJcqB3ea45pw3k5thpWaqpI12RGYU3MiP91Kgao5MCXtlFtL2rwISxYL"
+	token := "g8dXuf2MqNkqJ5tb47qw4m6thqYbrsK24SFZV4OiS83Lmbp8NCYulXtO3tyHJyZN"
 	limit := 100
 	settings := NewSettings(10, 60, true)
 	conn, err := db.NewDatabaseConnection(dbOptions)
@@ -67,28 +67,28 @@ func TestDefaultRateLimiter(t *testing.T) {
 		t.Fatal(err)
 	}
 	rt := NewDefaultRateLimiter(settings, conn)
-	t.Run("CanGo", func(t *testing.T) {
+	t.Run("Execute", func(t *testing.T) {
 		req, err := http.NewRequest("GET", "/", nil)
 		if err != nil {
 			t.Fatal(err)
 		}
 		req.RemoteAddr = "127.0.0.1:8080"
 		for i := 0; i < 10; i++ {
-			if proceed, err := rt.CanGo(ctx, req); !proceed || err != nil {
-				t.Errorf("CanGo(%v, %v) = (%v, %v), want (%v, %v)", ctx, req, proceed, err, true, nil)
+			if proceed, err := rt.Execute(ctx, req); !proceed || err != nil {
+				t.Errorf("Execute(%v, %v) = (%v, %v), want (%v, %v)", ctx, req, proceed, err, true, nil)
 			}
 		}
-		if proceed, err := rt.CanGo(ctx, req); proceed || err != nil {
-			t.Errorf("CanGo(%v, %v) = (%v, %v), want (%v, %v)", ctx, req, proceed, err, false, nil)
+		if proceed, err := rt.Execute(ctx, req); proceed || err != nil {
+			t.Errorf("Execute(%v, %v) = (%v, %v), want (%v, %v)", ctx, req, proceed, err, false, nil)
 		}
 		req.Header.Add("API_KEY", token)
 		for i := 0; i < limit; i++ {
-			if proceed, err := rt.CanGo(ctx, req); !proceed || err != nil {
-				t.Errorf("CanGo(%v, %v) = (%v, %v), want (%v, %v)", ctx, req, proceed, err, true, nil)
+			if proceed, err := rt.Execute(ctx, req); !proceed || err != nil {
+				t.Errorf("Execute(%v, %v) = (%v, %v), want (%v, %v)", ctx, req, proceed, err, true, nil)
 			}
 		}
-		if proceed, err := rt.CanGo(ctx, req); proceed || err != nil {
-			t.Errorf("CanGo(%v, %v) = (%v, %v), want (%v, %v)", ctx, req, proceed, err, false, nil)
+		if proceed, err := rt.Execute(ctx, req); proceed || err != nil {
+			t.Errorf("Execute(%v, %v) = (%v, %v), want (%v, %v)", ctx, req, proceed, err, false, nil)
 		}
 	})
 }

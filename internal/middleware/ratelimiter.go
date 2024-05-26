@@ -21,7 +21,7 @@ func NewRateLimiterMiddleware(rt ratelimiter.RateLimiter) *RateLimiterMiddleware
 
 func (m *RateLimiterMiddleware) Execute(ctx context.Context, next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		proceed, err := m.rt.CanGo(ctx, r)
+		proceed, err := m.rt.Execute(ctx, r)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

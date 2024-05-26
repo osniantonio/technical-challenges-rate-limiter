@@ -6,7 +6,6 @@ type Config struct {
 	DBProtocol     string `mapstructure:"DB_PROTOCOL"`
 	DBHost         string `mapstructure:"DB_HOST"`
 	DBPort         string `mapstructure:"DB_PORT"`
-	DBUser         string `mapstructure:"DB_USER"`
 	DBPassword     string `mapstructure:"DB_PASSWORD"`
 	DBDatabase     string `mapstructure:"DB_DATABASE"`
 	LimitByToken   bool   `mapstructure:"LIMIT_BY_TOKEN"`

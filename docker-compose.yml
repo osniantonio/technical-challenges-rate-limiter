@@ -9,7 +9,7 @@ services:
       - -c
       - redis-server --requirepass "$${DB_PASSWORD:?DB_PASSWORD variable is not set}"
     ports:
-      - "$DB_PORT:$DB_PORT"
+      - "6379:6379"
     env_file:
       - dev.env
     networks:
@@ -19,6 +19,7 @@ services:
       interval: 1s
       timeout: 3s
       retries: 10
+      
   app:
     container_name: rate-limiter
     build:

@@ -43,7 +43,7 @@ Testes automatizados demonstrando a eficácia e a robustez do rate limiter.
 Utilize docker/docker-compose para que possamos realizar os testes de sua aplicação.
 O servidor web deve responder na porta 8080.
 
-### Como subir o ambiente
+### Como subir o ambiente e o Rate Limiter em Golang
 
 Para subir o ambiente via docker, execute:
 
@@ -63,20 +63,6 @@ Para para o ambiente, execute:
 make down
 ```
 
-### Como subir o Rate Limiter em Golang
-
-Para subir o Rate Limiter via go, execute:
-
-```sh
-go run cmd/rate-limiter/main.go
-```
-
-Ou utilizando o make, execute:
-
-```sh
-make run
-```
-
 ### Como testar
 
 Primeiro execute os comandos descritos em:
@@ -88,7 +74,7 @@ Primeiro execute os comandos descritos em:
 As requisições devem ser realizadas para a porta 8080 e o token de acesso vai no cabeçalho como uma API_KEY. Segue exemplo:
 
 ```sh
-http GET http://localhost:8080 API_KEY:p7eWgd0PvJcqB3ea45pw3k5thpWaqpI12RGYU3MiP91Kgao5MCXtlFtL2rwISxYL
+http GET http://localhost:8080 API_KEY:g8dXuf2MqNkqJ5tb47qw4m6thqYbrsK24SFZV4OiS83Lmbp8NCYulXtO3tyHJyZN
 ```
 
 ### Testar várias requisições simultâneas
@@ -101,7 +87,7 @@ Com o ApacheBench, execute:
 
 ```sh
 ab -n 20 http://localhost:8080/
-ab -n 101 -H "API_KEY: p7eWgd0PvJcqB3ea45pw3k5thpWaqpI12RGYU3MiP91Kgao5MCXtlFtL2rwISxYL" http://localhost:8080/
+ab -n 101 -H "API_KEY: g8dXuf2MqNkqJ5tb47qw4m6thqYbrsK24SFZV4OiS83Lmbp8NCYulXtO3tyHJyZN" http://localhost:8080/
 ```
 
 ### Demais testes

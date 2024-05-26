@@ -28,16 +28,6 @@ var (
 	mid      middleware.Middleware
 )
 
-func main() {
-	loadConfig()
-	connectToDatabase()
-	createTokens()
-	initSettings()
-	initRateLimiter()
-	initMiddleware()
-	startServer()
-}
-
 func loadConfig() {
 	var err error
 	config, err = configs.LoadConfig(".")
@@ -46,13 +36,12 @@ func loadConfig() {
 	}
 }
 
-func connectToDatabase() {
+func NewDatabaseConnection() {
 	var err error
 	conn, err = db.NewDatabaseConnection(&gateway.DatabaseOptions{
 		Protocol: config.DBProtocol,
 		Host:     config.DBHost,
 		Port:     config.DBPort,
-		User:     config.DBUser,
 		Password: config.DBPassword,
 		Database: config.DBDatabase,
 	})
@@ -61,15 +50,15 @@ func connectToDatabase() {
 	}
 }
 
-func createTokens() {
-	r, err := os.ReadFile("./assets/tokens.json")
+func NewTokens() {
+	r, err := os.ReadFile("./resources/tokens.json")
 	if err != nil {
-		log.Fatalf("unable to load tokens: %v", err)
+		log.Fatalf("Failed when trying to load the tokens: %v", err)
 	}
 	tokens := []Token{}
 	err = json.Unmarshal([]byte(r), &tokens)
 	if err != nil {
-		log.Fatalf("unable to parse tokens: %v", err)
+		log.Fatalf("Failed when trying to parse the tokens: %v", err)
 	}
 	ctx := context.Background()
 	for _, token := range tokens {
@@ -77,19 +66,16 @@ func createTokens() {
 	}
 }
 
-func initSettings() {
+func init() {
+	loadConfig()
+	NewDatabaseConnection()
+	NewTokens()
 	settings = ratelimiter.NewSettings(config.RateLimit, config.ExpirationTime, config.LimitByToken)
-}
-
-func initRateLimiter() {
 	rt = ratelimiter.NewDefaultRateLimiter(settings, conn)
-}
-
-func initMiddleware() {
 	mid = middleware.NewRateLimiterMiddleware(rt)
 }
 
-func startServer() {
+func main() {
 	ctx := context.Background()
 	mux := http.NewServeMux()
 	mux.Handle("/", mid.Execute(ctx, &handler.DefaultHandler{}))
