@@ -16,7 +16,7 @@ As configurações de limite do token de acesso devem se sobrepor as do IP. Ex: 
 O rate limiter deve poder trabalhar como um middleware que é injetado ao servidor web
 O rate limiter deve permitir a configuração do número máximo de requisições permitidas por segundo.
 O rate limiter deve ter ter a opção de escolher o tempo de bloqueio do IP ou do Token caso a quantidade de requisições tenha sido excedida.
-As configurações de limite devem ser realizadas via variáveis de ambiente ou em um arquivo “.env” na pasta raiz.
+As configurações de limite devem ser realizadas via variáveis de ambiente ou em um arquivo “dev.env” na pasta raiz.
 Deve ser possível configurar o rate limiter tanto para limitação por IP quanto por token de acesso.
 O sistema deve responder adequadamente quando o limite é excedido:
 Código HTTP: 429
@@ -42,3 +42,77 @@ Documentação explicando como o rate limiter funciona e como ele pode ser confi
 Testes automatizados demonstrando a eficácia e a robustez do rate limiter.
 Utilize docker/docker-compose para que possamos realizar os testes de sua aplicação.
 O servidor web deve responder na porta 8080.
+
+### Como subir o ambiente
+
+Para subir o ambiente via docker, execute:
+
+```sh
+docker-compose --env-file dev.env up -d --build
+```
+
+Ou, utilizando o make, execute:
+
+```sh
+make up
+```
+
+Para para o ambiente, execute:
+
+```sh
+make down
+```
+
+### Como subir o Rate Limiter em Golang
+
+Para subir o Rate Limiter via go, execute:
+
+```sh
+go run cmd/rate-limiter/main.go
+```
+
+Ou utilizando o make, execute:
+
+```sh
+make run
+```
+
+### Como testar
+
+Primeiro execute os comandos descritos em:
+
+1. Como subir o ambiente;
+2. Como subir o Rate Limiter em Golang;
+3. Por fim, execute os testes seguindo o descrito a seguir.
+
+As requisições devem ser realizadas para a porta 8080 e o token de acesso vai no cabeçalho como uma API_KEY. Segue exemplo:
+
+```sh
+http GET http://localhost:8080 API_KEY:p7eWgd0PvJcqB3ea45pw3k5thpWaqpI12RGYU3MiP91Kgao5MCXtlFtL2rwISxYL
+```
+
+### Testar várias requisições simultâneas
+
+Utilizando a ferramenta ApacheBench:
+
+Instale o ApacheBench: sudo apt install apache2-utils (Linux);
+
+Com o ApacheBench, execute:
+
+```sh
+ab -n 20 http://localhost:8080/
+ab -n 101 -H "API_KEY: p7eWgd0PvJcqB3ea45pw3k5thpWaqpI12RGYU3MiP91Kgao5MCXtlFtL2rwISxYL" http://localhost:8080/
+```
+
+### Demais testes
+
+```sh
+go test -v ./...
+```
+
+Ou, ainda:
+
+```sh
+go test -v ./... -coverprofile=c.out
+go tool cover -html=c.out
+```

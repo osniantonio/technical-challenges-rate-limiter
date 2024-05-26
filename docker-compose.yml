@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:latest
+    container_name: redis
+    command:
+      - /bin/sh
+      - -c
+      - redis-server --requirepass "$${DB_PASSWORD:?DB_PASSWORD variable is not set}"
+    ports:
+      - "$DB_PORT:$DB_PORT"
+    env_file:
+      - dev.env
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli", "--raw", "incr", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 10
+  app:
+    container_name: rate-limiter
+    build:
+      context: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
