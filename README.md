@@ -54,6 +54,7 @@ docker-compose --env-file dev.env up -d --build
 Ou, utilizando o make, execute:
 
 ```sh
+make build
 make up
 ```
 

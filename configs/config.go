@@ -9,7 +9,7 @@ type Config struct {
 	DBPassword     string `mapstructure:"DB_PASSWORD"`
 	DBDatabase     string `mapstructure:"DB_DATABASE"`
 	LimitByToken   bool   `mapstructure:"LIMIT_BY_TOKEN"`
-	RateLimit      int    `mapstructure:"RATE_LIMIT"`
+	RateLimit      int    `mapstructure:"RATE_LIMIT_TOKEN"`
 	ExpirationTime int    `mapstructure:"EXPIRATION_TIME"`
 }
 

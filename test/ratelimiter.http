@@ -1,0 +1,8 @@
+// Listar um usuário pelo ID
+# GET http://localhost:8080  HTTP/1.1
+# Content-Type: application/json
+# API_KEY: g8dXuf2MqNkqJ5tb47qw4m6thqYbrsK24SFZV4OiS83Lmbp8NCYulXtO3tyHJyZN
+
+## Para testar o 429 Too Many Requests basta enviar algumas vezes em seguida
+GET http://localhost:8080  HTTP/1.1
+Content-Type: application/json

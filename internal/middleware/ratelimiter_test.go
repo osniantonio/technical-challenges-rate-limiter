@@ -18,7 +18,8 @@ import (
 )
 
 var (
-	dbOptions *gateway.DatabaseOptions
+	dbOptions                  *gateway.DatabaseOptions
+	tooManyRequestsMessageTest = "you have reached the maximum number of requests or actions allowed within a certain time frame"
 )
 
 func TestMain(m *testing.M) {
@@ -58,19 +59,34 @@ func TestMain(m *testing.M) {
 }
 
 func TestRateLimiterMiddleware(t *testing.T) {
+	// Configuração do banco de dados
+	dbOptions := &gateway.DatabaseOptions{
+		Protocol: "redis",
+		Host:     "localhost",
+		Port:     "6379",
+		Database: "0",
+	}
 	conn, err := db.NewDatabaseConnection(dbOptions)
 	if err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
+
+	// Configuração do rate limiter
 	settings := ratelimiter.NewSettings(10, 60, true)
 	rt := ratelimiter.NewDefaultRateLimiter(settings, conn)
+
+	// Criação do middleware
 	mid := NewRateLimiterMiddleware(rt)
+
+	// Configuração do contexto e request
 	ctx := context.Background()
 	req, err := http.NewRequest("GET", "/", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	req.RemoteAddr = "127.0.0.1:8080"
+
+	// Execução do teste
 	t.Run("Execute", func(t *testing.T) {
 		for i := 0; i < 10; i++ {
 			h := mid.Execute(ctx, &handler.DefaultHandler{})
@@ -88,10 +104,10 @@ func TestRateLimiterMiddleware(t *testing.T) {
 		rr := httptest.NewRecorder()
 		h.ServeHTTP(rr, req)
 		if status := rr.Code; status != http.StatusTooManyRequests {
-			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
+			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusTooManyRequests)
 		}
-		if rr.Body.String() != tooManyRequestsMessage {
-			t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), tooManyRequestsMessage)
+		if rr.Body.String() != tooManyRequestsMessageTest {
+			t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), tooManyRequestsMessageTest)
 		}
 	})
 }
