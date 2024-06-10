@@ -107,16 +107,3 @@ Com o ApacheBench, execute:
 ab -n 20 http://localhost:8080/
 ab -n 101 -H "API_KEY: g8dXuf2MqNkqJ5tb47qw4m6thqYbrsK24SFZV4OiS83Lmbp8NCYulXtO3tyHJyZN" http://localhost:8080/
 ```
-
-### Demais testes
-
-```sh
-go test -v ./...
-```
-
-Ou, ainda:
-
-```sh
-go test -v ./... -coverprofile=c.out
-go tool cover -html=c.out
-```
