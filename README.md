@@ -79,7 +79,11 @@ make build
 make up
 ```
 
-2. Por fim, execute os testes descritos em Testar várias requisições simultâneas.
+2. Por fim, execute os testes descritos em Testar várias requisições simultâneas ou uma a uma via HTTP.
+
+### Testar via HTTP
+
+Em ./test/ratelimiter.http
 
 ### Testar várias requisições simultâneas
 
