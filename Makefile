@@ -19,11 +19,15 @@ test-run:
 	@echo "Testes realizados com sucesso."
 
 test-exceed:
-	go test -v -run TestExceedingTheRateLimiter ./internal/ratelimiter/default_test.go
+	go test -v -run TestRateLimiterMiddleware ./internal/middleware/ratelimiter_test.go
 	@echo "Testes realizados com sucesso."
 
 test-override:
 	go test -v -run TestTokenOverrideIPRateLimit ./internal/ratelimiter/default_test.go
+	@echo "Testes realizados com sucesso."
+
+test-token:
+	go test -v -run TestExecuteByToken ./internal/ratelimiter/default_test.go
 	@echo "Testes realizados com sucesso."
 
 test-ip:

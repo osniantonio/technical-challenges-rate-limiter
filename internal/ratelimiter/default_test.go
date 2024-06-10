@@ -242,3 +242,37 @@ func TestExecuteByIP(t *testing.T) {
 		}
 	})
 }
+
+func TestExecuteByToken(t *testing.T) {
+	ctx := context.Background()
+	token := "g8dXuf2MqNkqJ5tb47qw4m6thqYbrsK24SFZV4OiS83Lmbp8NCYulXtO3tyHJyZN"
+	limit := 100
+	settings := ratelimiter.NewSettings(10, 60, true)
+	conn, err := db.NewDatabaseConnection(dbOptions)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := conn.CreateToken(ctx, token, limit); err != nil {
+		t.Fatal(err)
+	}
+	rt := ratelimiter.NewDefaultRateLimiter(settings, conn)
+
+	t.Run("Execute by Token", func(t *testing.T) {
+		req, err := http.NewRequest("GET", "/", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		req.RemoteAddr = "127.0.0.1:8080"
+
+		for i := 0; i < settings.Ratelimit; i++ {
+			proceed, err := rt.ExecuteByToken(ctx, req)
+			if !proceed || err != nil {
+				t.Errorf("ExecuteByToken(%v, %v) = (%v, %v), want (%v, %v)", ctx, req, proceed, err, true, nil)
+			}
+		}
+
+		if proceed, err := rt.ExecuteByToken(ctx, req); proceed || err != nil {
+			t.Errorf("ExecuteByToken(%v, %v) = (%v, %v), want (%v, %v)", ctx, req, proceed, err, false, nil)
+		}
+	})
+}

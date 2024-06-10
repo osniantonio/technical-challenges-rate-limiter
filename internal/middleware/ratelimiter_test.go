@@ -1,4 +1,4 @@
-package middleware
+package middleware_test
 
 import (
 	"context"
@@ -9,9 +9,11 @@ import (
 	"os"
 	"testing"
 
+	"github.com/ory/dockertest/v3"
 	"github.com/osniantonio/technical-challenges-rate-limiter/internal/gateway"
 	"github.com/osniantonio/technical-challenges-rate-limiter/internal/handler"
 	"github.com/osniantonio/technical-challenges-rate-limiter/internal/infra/db"
+	middlewareTest "github.com/osniantonio/technical-challenges-rate-limiter/internal/middleware"
 	"github.com/osniantonio/technical-challenges-rate-limiter/internal/ratelimiter"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
@@ -59,34 +61,51 @@ func TestMain(m *testing.M) {
 }
 
 func TestRateLimiterMiddleware(t *testing.T) {
-	// Configuração do banco de dados
-	dbOptions := &gateway.DatabaseOptions{
-		Protocol: "redis",
-		Host:     "localhost",
-		Port:     "6379",
-		Database: "0",
-	}
-	conn, err := db.NewDatabaseConnection(dbOptions)
+	pool, err := dockertest.NewPool("")
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("Could not connect to Docker: %v", err)
 	}
 
-	// Configuração do rate limiter
+	resource, err := pool.Run("redis", "latest", nil)
+	if err != nil {
+		t.Fatalf("Could not start Redis container: %v", err)
+	}
+
+	defer func() {
+		if err := pool.Purge(resource); err != nil {
+			t.Fatalf("Could not purge Redis container: %v", err)
+		}
+	}()
+
+	// Redis
+	dbOptions := &gateway.DatabaseOptions{
+		Protocol: "redis",
+		Host:     resource.Container.NetworkSettings.IPAddress,
+		Port:     "6379",
+		Database: "0",
+		Password: "",
+	}
+
+	// Conecte-se ao banco de dados Redis
+	conn, err := db.NewDatabaseConnection(dbOptions)
+	if err != nil {
+		t.Fatalf("Could not connect to Redis: %v", err)
+	}
+
+	// Configurar o rate limiter
 	settings := ratelimiter.NewSettings(10, 60, true)
 	rt := ratelimiter.NewDefaultRateLimiter(settings, conn)
 
-	// Criação do middleware
-	mid := NewRateLimiterMiddleware(rt)
+	mid := middlewareTest.NewRateLimiterMiddleware(rt)
 
-	// Configuração do contexto e request
 	ctx := context.Background()
 	req, err := http.NewRequest("GET", "/", nil)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("Could not create request: %v", err)
 	}
 	req.RemoteAddr = "127.0.0.1:8080"
 
-	// Execução do teste
+	// Executar o teste
 	t.Run("Execute", func(t *testing.T) {
 		for i := 0; i < 10; i++ {
 			h := mid.Execute(ctx, &handler.DefaultHandler{})

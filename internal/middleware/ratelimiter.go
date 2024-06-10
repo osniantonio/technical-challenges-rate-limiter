@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"log"
 	"net/http"
 
 	"github.com/osniantonio/technical-challenges-rate-limiter/internal/ratelimiter"
@@ -27,6 +28,7 @@ func (m *RateLimiterMiddleware) Execute(ctx context.Context, next http.Handler) 
 			return
 		}
 		if !proceed {
+			log.Printf("you have reached the maximum number of requests or actions allowed within a certain time frame from %s", r.RemoteAddr)
 			w.WriteHeader(http.StatusTooManyRequests)
 			w.Write([]byte(tooManyRequestsMessage))
 			return
